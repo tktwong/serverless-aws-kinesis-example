@@ -47,7 +47,7 @@ functions:
           batchSize: 10
           maximumRetryAttempts: 3
           parallelizationFactor: 2
-          startingPosition: TRIM_HORIZON
+          startingPosition: LATEST
       # - stream:
       #     type: kinesis
       #     arn:

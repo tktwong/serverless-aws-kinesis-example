@@ -13,9 +13,7 @@ provider:
   region: ${opt:region, 'ap-east-1'}
   environment:
     KINESIS_STREAM_NAME: ${self:service}-Kinesis-${self:provider.stage}
-    ACCOUNT_ID: 
-      - Ref: 'AWS::AccountId'
-    KINESIS_ARN: arn:aws:kinesis:${self:provider.region}:${self:provider.ACCOUNT_ID, '000000000000'}:stream/${self:provider.environment.KINESIS_STREAM_NAME}
+    KINESIS_ARN: ${file(./config/${self:provider.stage}.yml):KINESIS_ARN}/${self:provider.environment.KINESIS_STREAM_NAME}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -30,23 +28,12 @@ custom:
     apiVersion: '2013-12-02'
     endpoint: http://0.0.0.0:4567
     region: ap-east-1
-    streamName: ${self:provider.environment.KINESIS_STREAM_NAME}
+    arn: ${self:provider.environment.KINESIS_ARN}
     accessKeyId: root
     secretAccessKey: root
     skipCacheInvalidation: false
     readInterval: 500
 
-resources:
-  Resources:
-    KinesisStream:
-      Type: AWS::Kinesis::Stream
-      Properties:
-        Name: ${self:provider.environment.KINESIS_STREAM_NAME} 
-        RetentionPeriodHours: 48 
-        ShardCount: 1
-        Tags: 
-            - Key: Stage
-              Value: ${opt:stage}
 functions:
   read-record-from-stream:
     handler: src/handler.readRecord
@@ -77,3 +64,15 @@ functions:
       - http:
           method: post
           path: records
+
+resources:
+  Resources:
+    KinesisStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:provider.environment.KINESIS_STREAM_NAME} 
+        RetentionPeriodHours: 48 
+        ShardCount: 1
+        Tags: 
+            - Key: Stage
+              Value: ${opt:stage}

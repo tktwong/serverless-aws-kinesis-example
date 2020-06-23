@@ -6,23 +6,16 @@ plugins:
   - serverless-offline-kinesis
   - serverless-offline
 
-custom:
-  serverless-offline-kinesis:
-    apiVersion: '2013-12-02'
-    endpoint: http://0.0.0.0:4567
-    region: ap-east-1
-    accessKeyId: root
-    secretAccessKey: root
-    skipCacheInvalidation: false
-    readInterval: 500
-
 provider:
   name: aws
   runtime: nodejs10.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ap-east-1'}
   environment:
-    KINESIS_STREAM_NAME: ${self:service}-MyKinesisName
+    KINESIS_STREAM_NAME: ${self:service}-Kinesis-${self:provider.stage}
+    ACCOUNT_ID: 
+      - Ref: 'AWS::AccountId'
+    KINESIS_ARN: arn:aws:kinesis:${self:provider.region}:${self:provider.ACCOUNT_ID, '000000000000'}:stream/${self:provider.environment.KINESIS_STREAM_NAME}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -31,6 +24,17 @@ provider:
         - "kinesis:PutRecords"
       Resource:
         Fn::GetAtt: [KinesisStream, Arn]
+
+custom:
+  serverless-offline-kinesis:
+    apiVersion: '2013-12-02'
+    endpoint: http://0.0.0.0:4567
+    region: ap-east-1
+    streamName: ${self:provider.environment.KINESIS_STREAM_NAME}
+    accessKeyId: root
+    secretAccessKey: root
+    skipCacheInvalidation: false
+    readInterval: 500
 
 resources:
   Resources:
@@ -52,7 +56,7 @@ functions:
       - stream:
           enabled: true
           type: kinesis
-          arn: arn:aws:kinesis:ap-east-1:000000000000:stream/${self:provider.environment.KINESIS_STREAM_NAME}
+          arn: ${self:provider.environment.KINESIS_ARN}
           batchSize: 10
           maximumRetryAttempts: 3
           parallelizationFactor: 2

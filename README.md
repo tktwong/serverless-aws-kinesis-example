@@ -17,21 +17,30 @@ $ npm install -g kinesalite
 $ npm install
 ```
 
+## Create stream
+```
+$ kinesalite
+$ aws --endpoint-url http://localhost:4567/ kinesis create-stream --stream-name=serverless-kinesis-aws-example-Kinesis-dev --shard-count=1
+```
+
 ## Offline start
 
 ```
-$ kinesalite
 $ sls offline start --region <region> --stage <stage>
 ```
 
-## Create stream
+## Rest call
 ```
-aws --endpoint-url http://localhost:4567/ kinesis create-stream --stream-name=serverless-kinesis-aws-example-MyKinesisName --shard-count=1
+curl --location --request POST 'http://localhost:3000/dev/records ' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "data": "streaming data..."
+}'
 ```
 
 ## Feed stream
 ```
-aws --endpoint-url http://localhost:4567/ kinesis put-record --stream-name serverless-kinesis-aws-example-MyKinesisName --partition-key orders --data 'streaming data'
+aws --endpoint-url http://localhost:4567/ kinesis put-record --stream-name serverless-kinesis-aws-example-Kinesis-dev --partition-key orders --data 'c3RyZWFtaW5nIGRhdGE='
 ```
 
 ## Built With

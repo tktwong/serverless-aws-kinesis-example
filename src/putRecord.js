@@ -28,8 +28,6 @@ const putRecord = async (event, _, callback) => {
             isBase64Encoded: false,
         })
     };
-
-
 }
 
 export default putRecord;
